@@ -1,0 +1,397 @@
+[
+  {
+    "id": 1,
+    "url": "bird_beaks/a1.jpg",
+    "beakType": "all-purpose"
+  },
+  {
+    "id": 2,
+    "url": "bird_beaks/a2.jpg",
+    "beakType": "all-purpose"
+  },
+  {
+    "id": 3,
+    "url": "bird_beaks/a3.jpg",
+    "beakType": "all-purpose"
+  },
+  {
+    "id": 4,
+    "url": "bird_beaks/a4.jpg",
+    "beakType": "all-purpose"
+  },
+  {
+    "id": 5,
+    "url": "bird_beaks/a5.jpg",
+    "beakType": "all-purpose"
+  },
+  {
+    "id": 6,
+    "url": "bird_beaks/a6.jpg",
+    "beakType": "all-purpose"
+  },
+  {
+    "id": 7,
+    "url": "bird_beaks/a7.jpg",
+    "beakType": "all-purpose"
+  },
+  {
+    "id": 8,
+    "url": "bird_beaks/a8.jpg",
+    "beakType": "all-purpose"
+  },
+  {
+    "id": 9,
+    "url": "bird_beaks/a9.jpg",
+    "beakType": "all-purpose"
+  },
+  {
+    "id": 10,
+    "url": "bird_beaks/b1.jpg",
+    "beakType": "cone"
+  },
+  {
+    "id": 11,
+    "url": "bird_beaks/b2.jpg",
+    "beakType": "cone"
+  },
+  {
+    "id": 12,
+    "url": "bird_beaks/b3.jpg",
+    "beakType": "cone"
+  },
+  {
+    "id": 13,
+    "url": "bird_beaks/b4.jpg",
+    "beakType": "cone"
+  },
+  {
+    "id": 14,
+    "url": "bird_beaks/b5.jpg",
+    "beakType": "cone"
+  },
+  {
+    "id": 15,
+    "url": "bird_beaks/b6.jpg",
+    "beakType": "cone"
+  },
+  {
+    "id": 16,
+    "url": "bird_beaks/b7.jpg",
+    "beakType": "cone"
+  },
+  {
+    "id": 17,
+    "url": "bird_beaks/b8.jpg",
+    "beakType": "cone"
+  },
+  {
+    "id": 18,
+    "url": "bird_beaks/b9.jpg",
+    "beakType": "cone"
+  },
+  {
+    "id": 19,
+    "url": "bird_beaks/c1.jpg",
+    "beakType": "curved"
+  },
+  {
+    "id": 20,
+    "url": "bird_beaks/c2.jpg",
+    "beakType": "curved"
+  },
+  {
+    "id": 21,
+    "url": "bird_beaks/c3.jpg",
+    "beakType": "curved"
+  },
+  {
+    "id": 22,
+    "url": "bird_beaks/c4.jpg",
+    "beakType": "curved"
+  },
+  {
+    "id": 23,
+    "url": "bird_beaks/c5.jpg",
+    "beakType": "curved"
+  },
+  {
+    "id": 24,
+    "url": "bird_beaks/c6.jpg",
+    "beakType": "curved"
+  },
+  {
+    "id": 25,
+    "url": "bird_beaks/c7.jpg",
+    "beakType": "curved"
+  },
+  {
+    "id": 26,
+    "url": "bird_beaks/c8.jpg",
+    "beakType": "curved"
+  },
+  {
+    "id": 27,
+    "url": "bird_beaks/d1.jpg",
+    "beakType": "dagger"
+  },
+  {
+    "id": 28,
+    "url": "bird_beaks/d2.jpg",
+    "beakType": "dagger"
+  },
+  {
+    "id": 29,
+    "url": "bird_beaks/d3.jpg",
+    "beakType": "dagger"
+  },
+  {
+    "id": 30,
+    "url": "bird_beaks/d4.jpg",
+    "beakType": "dagger"
+  },
+  {
+    "id": 31,
+    "url": "bird_beaks/d5.jpg",
+    "beakType": "dagger"
+  },
+  {
+    "id": 32,
+    "url": "bird_beaks/d6.jpg",
+    "beakType": "dagger"
+  },
+  {
+    "id": 33,
+    "url": "bird_beaks/d7.jpg",
+    "beakType": "dagger"
+  },
+  {
+    "id": 34,
+    "url": "bird_beaks/d8.jpg",
+    "beakType": "dagger"
+  },
+  {
+    "id": 35,
+    "url": "bird_beaks/e1.png",
+    "beakType": "hooked"
+  },
+  {
+    "id": 36,
+    "url": "bird_beaks/e2.jpg",
+    "beakType": "hooked"
+  },
+  {
+    "id": 37,
+    "url": "bird_beaks/e3.jpg",
+    "beakType": "hooked"
+  },
+  {
+    "id": 38,
+    "url": "bird_beaks/e4.jpg",
+    "beakType": "hooked"
+  },
+  {
+    "id": 39,
+    "url": "bird_beaks/e5.jpg",
+    "beakType": "hooked"
+  },
+  {
+    "id": 40,
+    "url": "bird_beaks/e6.jpg",
+    "beakType": "hooked"
+  },
+  {
+    "id": 41,
+    "url": "bird_beaks/e7.jpg",
+    "beakType": "hooked"
+  },
+  {
+    "id": 42,
+    "url": "bird_beaks/e8.jpg",
+    "beakType": "hooked"
+  },
+  {
+    "id": 43,
+    "url": "bird_beaks/f1.jpg",
+    "beakType": "hooked-seabird"
+  },
+  {
+    "id": 44,
+    "url": "bird_beaks/f2.jpg",
+    "beakType": "hooked-seabird"
+  },
+  {
+    "id": 45,
+    "url": "bird_beaks/f3.jpg",
+    "beakType": "hooked-seabird"
+  },
+  {
+    "id": 46,
+    "url": "bird_beaks/f4.jpg",
+    "beakType": "hooked-seabird"
+  },
+  {
+    "id": 47,
+    "url": "bird_beaks/f5.jpg",
+    "beakType": "hooked-seabird"
+  },
+  {
+    "id": 48,
+    "url": "bird_beaks/f6.jpg",
+    "beakType": "hooked-seabird"
+  },
+  {
+    "id": 49,
+    "url": "bird_beaks/f7.jpg",
+    "beakType": "hooked-seabird"
+  },
+  {
+    "id": 50,
+    "url": "bird_beaks/f8.jpg",
+    "beakType": "hooked-seabird"
+  },
+  {
+    "id": 51,
+    "url": "bird_beaks/g1.jpg",
+    "beakType": "needle"
+  },
+  {
+    "id": 52,
+    "url": "bird_beaks/g2.jpg",
+    "beakType": "needle"
+  },
+  {
+    "id": 53,
+    "url": "bird_beaks/g3.jpg",
+    "beakType": "needle"
+  },
+  {
+    "id": 54,
+    "url": "bird_beaks/g4.jpg",
+    "beakType": "needle"
+  },
+  {
+    "id": 55,
+    "url": "bird_beaks/g5.jpg",
+    "beakType": "needle"
+  },
+  {
+    "id": 56,
+    "url": "bird_beaks/g6.jpg",
+    "beakType": "needle"
+  },
+  {
+    "id": 57,
+    "url": "bird_beaks/g7.jpg",
+    "beakType": "needle"
+  },
+  {
+    "id": 58,
+    "url": "bird_beaks/g8.jpg",
+    "beakType": "needle"
+  },
+  {
+    "id": 59,
+    "url": "bird_beaks/g9.jpg",
+    "beakType": "needle"
+  },
+  {
+    "id": 60,
+    "url": "bird_beaks/g10.jpg",
+    "beakType": "needle"
+  },
+  {
+    "id": 61,
+    "url": "bird_beaks/g11.jpg",
+    "beakType": "needle"
+  },
+  {
+    "id": 62,
+    "url": "bird_beaks/g12.jpg",
+    "beakType": "needle"
+  },
+  {
+    "id": 63,
+    "url": "bird_beaks/h1.jpg",
+    "beakType": "spatulate"
+  },
+  {
+    "id": 64,
+    "url": "bird_beaks/h2.jpg",
+    "beakType": "spatulate"
+  },
+  {
+    "id": 65,
+    "url": "bird_beaks/h3.jpg",
+    "beakType": "spatulate"
+  },
+  {
+    "id": 66,
+    "url": "bird_beaks/h4.jpg",
+    "beakType": "spatulate"
+  },
+  {
+    "id": 67,
+    "url": "bird_beaks/h5.jpg",
+    "beakType": "spatulate"
+  },
+  {
+    "id": 68,
+    "url": "bird_beaks/h6.jpg",
+    "beakType": "spatulate"
+  },
+  {
+    "id": 69,
+    "url": "bird_beaks/h7.jpg",
+    "beakType": "spatulate"
+  },
+  {
+    "id": 70,
+    "url": "bird_beaks/h8.jpg",
+    "beakType": "spatulate"
+  },
+  {
+    "id": 71,
+    "url": "bird_beaks/h9.jpg",
+    "beakType": "spatulate"
+  },
+  {
+    "id": 72,
+    "url": "bird_beaks/i1.jpg",
+    "beakType": "specialized"
+  },
+  {
+    "id": 73,
+    "url": "bird_beaks/i2.jpg",
+    "beakType": "specialized"
+  },
+  {
+    "id": 74,
+    "url": "bird_beaks/i3.jpg",
+    "beakType": "specialized"
+  },
+  {
+    "id": 75,
+    "url": "bird_beaks/i4.jpg",
+    "beakType": "specialized"
+  },
+  {
+    "id": 76,
+    "url": "bird_beaks/i5.jpg",
+    "beakType": "specialized"
+  },
+  {
+    "id": 77,
+    "url": "bird_beaks/i6.jpg",
+    "beakType": "specialized"
+  },
+  {
+    "id": 78,
+    "url": "bird_beaks/i7.jpg",
+    "beakType": "specialized"
+  },
+  {
+    "id": 79,
+    "url": "bird_beaks/i8.jpg",
+    "beakType": "specialized"
+  }
+]

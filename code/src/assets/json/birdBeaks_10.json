@@ -1,0 +1,52 @@
+[
+  {
+    "id": 2,
+    "url": "bird_beaks/a2.jpg",
+    "beakType": "all-purpose"
+  },
+  {
+    "id": 6,
+    "url": "bird_beaks/a6.jpg",
+    "beakType": "all-purpose"
+  },
+  {
+    "id": 11,
+    "url": "bird_beaks/b2.jpg",
+    "beakType": "cone"
+  },
+  {
+    "id": 24,
+    "url": "bird_beaks/c6.jpg",
+    "beakType": "curved"
+  },
+  {
+    "id": 33,
+    "url": "bird_beaks/d7.jpg",
+    "beakType": "dagger"
+  },
+  {
+    "id": 37,
+    "url": "bird_beaks/e3.jpg",
+    "beakType": "hooked"
+  },
+  {
+    "id": 60,
+    "url": "bird_beaks/g10.jpg",
+    "beakType": "needle"
+  },
+  {
+    "id": 66,
+    "url": "bird_beaks/h4.jpg",
+    "beakType": "spatulate"
+  },
+  {
+    "id": 72,
+    "url": "bird_beaks/i1.jpg",
+    "beakType": "specialized"
+  },
+  {
+    "id": 79,
+    "url": "bird_beaks/i8.jpg",
+    "beakType": "specialized"
+  }
+]

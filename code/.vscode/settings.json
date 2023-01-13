@@ -1,0 +1,15 @@
+{
+  // "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": false,
+  "prettier.useEditorConfig": false,
+  "prettier.configPath": ".prettierrc",
+  "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  "eslint.enable": true,
+  "eslint.alwaysShowStatus": true,
+  "eslint.codeActionsOnSave.mode": "all",
+  "eslint.validate": [
+    "javascript",
+    "typescript"
+  ]
+}
