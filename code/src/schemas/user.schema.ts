@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { Document } from 'mongoose'
-import { InputModality, TaskTypes } from 'src/schemas/task-progress.schema'
+import { InputModality, TaskTypes, Purpose } from 'src/schemas/task-progress.schema'
 
 export type UserDocument = User & Document
 
@@ -31,6 +31,13 @@ export class User {
     enum: ['gesture', 'normal'],
   })
   inputModality: InputModality
+
+  @Prop({
+    type: String,
+    required: true,
+    enum: ['switching', 'hcomp'],
+  })
+  purpose: Purpose
 
   @Prop({ required: true, unique: true, index: true })
   prolificId: string

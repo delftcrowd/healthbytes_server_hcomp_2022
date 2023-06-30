@@ -3,9 +3,9 @@ import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { getUserDetails } from 'src/dto'
 import { User, UserDocument } from 'src/schemas/user.schema'
-import { InputModality, TaskTypes } from 'src/schemas/task-progress.schema'
+import { InputModality, TaskTypes, Purpose } from 'src/schemas/task-progress.schema'
 
-export type UserDetails = Pick<User, 'prolificId' | 'taskType' | 'inputModality'> & {
+export type UserDetails = Pick<User, 'prolificId' | 'purpose' | 'taskType' | 'inputModality'> & {
   id: string
 }
 
@@ -51,9 +51,10 @@ export class UserService {
     return this.userModel.updateOne({ prolificId }, { $set: { exitSurveyCompleted: true } }).exec()
   }
 
-  async create(prolificId: string, taskType: TaskTypes, inputModality: InputModality): Promise<UserDocument> {
+  async create(prolificId: string, purpose: Purpose, taskType: TaskTypes, inputModality: InputModality): Promise<UserDocument> {
     const newUser = new this.userModel({
       prolificId: prolificId,
+      purpose,
       taskType,
       inputModality,
     })

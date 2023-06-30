@@ -8,7 +8,7 @@ import { getUserDetails } from 'src/dto'
 import { RefreshToken, RefreshTokenDocument } from 'src/schemas/refresh-token.schema'
 import { User } from 'src/schemas/user.schema'
 import { UserDetails, UserService } from 'src/users/users.service'
-import { InputModality, TaskTypes } from 'src/schemas/task-progress.schema'
+import { InputModality, TaskTypes, Purpose } from 'src/schemas/task-progress.schema'
 
 export type ExistingUserDTO = Pick<User, 'prolificId'>
 export type NewUserDTO = Pick<User, 'prolificId'>
@@ -31,12 +31,12 @@ export class AuthService {
     private jwtService: JwtService,
   ) { }
 
-  async register(prolificId: string, taskType: TaskTypes, inputModality: InputModality): Promise<User | any> {
+  async register(prolificId: string, purpose: Purpose, taskType: TaskTypes, inputModality: InputModality): Promise<User | any> {
     const existingUser = await this.userService.findByProlificId(prolificId)
 
     if (existingUser) throw new UnprocessableEntityException('ProlificId already registered')
 
-    const newUser = await this.userService.create(prolificId, taskType, inputModality)
+    const newUser = await this.userService.create(prolificId, purpose, taskType, inputModality)
 
     return getUserDetails(newUser)
   }

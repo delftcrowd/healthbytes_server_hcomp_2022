@@ -22,7 +22,7 @@ export class AuthController {
   async login(@Body() body: LoginRequest): Promise<{ status: string; data: AuthenticationPayload } | null> {
     const isRegistered = await this.authService.isRegistered(body.prolificId)
     if (!isRegistered) {
-      await this.authService.register(body.prolificId, body.taskType, body.inputModality)
+      await this.authService.register(body.prolificId, body.purpose, body.taskType, body.inputModality)
     }
     const response = await this.authService.login(body.prolificId)
 

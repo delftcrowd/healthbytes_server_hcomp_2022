@@ -1,9 +1,11 @@
 import { isNotEmpty, IsNotEmpty, IsOptional, matches, Matches, MaxLength, MinLength } from 'class-validator'
-import { InputModality, TaskTypes } from 'src/schemas/task-progress.schema'
+import { InputModality, TaskTypes, Purpose } from 'src/schemas/task-progress.schema'
 
 export class LoginRequest {
   @IsNotEmpty({ message: 'ProlificId is required' })
   readonly prolificId: string
+  @IsNotEmpty({ message: 'Purpose is required' })
+  readonly purpose: Purpose
   @IsNotEmpty({ message: 'TaskType is required' })
   readonly taskType: TaskTypes
   @IsNotEmpty({ message: 'InputModality is required' })

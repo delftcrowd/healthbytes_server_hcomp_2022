@@ -11,6 +11,7 @@ export type TaskDocument = Task & Document
 
 export type TaskTypes = 'bird' | 'movie' | 'person'
 export type InputModality = 'gesture' | 'normal'
+export type Purpose = 'switching' | 'hcomp'
 
 @Schema({ collection: 'progress', discriminatorKey: 'taskType' })
 export class Task {
