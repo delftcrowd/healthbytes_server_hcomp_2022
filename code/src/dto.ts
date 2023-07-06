@@ -7,6 +7,7 @@ export type TaskDetails = Pick<Task, 'taskType' | 'state' | 'questionNumber' | '
   user: string
   inputModality: InputModality
   purpose: Purpose
+  condition: string
 }
 export type PersonQuestionsDetails = Pick<PersonQuestions, 'midnamePersons' | 'professionPersons' | 'answers'>
 export type MovieQuestionsDetails = Pick<MovieQuestions, 'movieReviews' | 'answers'>
@@ -20,6 +21,7 @@ export const getUserDetails = (user: UserDocument): UserDetails => {
     purpose: user.purpose,
     taskType: user.taskType,
     inputModality: user.inputModality,
+    condition: user.condition,
   }
 }
 
@@ -32,6 +34,7 @@ export const getTaskDetails = (
     taskType: task.taskType,
     inputModality: userDetails.inputModality,
     purpose: userDetails.purpose,
+    condition: userDetails.condition,
     state: task.state,
     questionNumber: task.questionNumber,
     complete: task.complete,

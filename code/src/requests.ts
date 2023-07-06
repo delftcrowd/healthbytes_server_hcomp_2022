@@ -10,6 +10,8 @@ export class LoginRequest {
   readonly taskType: TaskTypes
   @IsNotEmpty({ message: 'InputModality is required' })
   readonly inputModality: InputModality
+  @IsOptional()
+  readonly condition: string
 }
 export class RegisterRequest {
   @IsNotEmpty({ message: 'ProlificId is required' })

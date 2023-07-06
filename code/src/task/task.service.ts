@@ -201,7 +201,7 @@ export class TaskService {
 
   async getTask(user: string) {
     const taskProgress = getTaskDetails(
-      await this.taskModel.findOne({ user }).populate('user', 'prolificId inputModality purpose -_id'),
+      await this.taskModel.findOne({ user }).populate('user', 'prolificId inputModality purpose condition -_id'),
     )
     await this.updateUserProgress(taskProgress)
     return taskProgress

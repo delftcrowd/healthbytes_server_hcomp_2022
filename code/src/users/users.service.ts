@@ -5,7 +5,7 @@ import { getUserDetails } from 'src/dto'
 import { User, UserDocument } from 'src/schemas/user.schema'
 import { InputModality, TaskTypes, Purpose } from 'src/schemas/task-progress.schema'
 
-export type UserDetails = Pick<User, 'prolificId' | 'purpose' | 'taskType' | 'inputModality'> & {
+export type UserDetails = Pick<User, 'prolificId' | 'purpose' | 'taskType' | 'inputModality' | 'condition' > & {
   id: string
 }
 
@@ -51,12 +51,13 @@ export class UserService {
     return this.userModel.updateOne({ prolificId }, { $set: { exitSurveyCompleted: true } }).exec()
   }
 
-  async create(prolificId: string, purpose: Purpose, taskType: TaskTypes, inputModality: InputModality): Promise<UserDocument> {
+  async create(prolificId: string, purpose: Purpose, taskType: TaskTypes, inputModality: InputModality, condition?: string): Promise<UserDocument> {
     const newUser = new this.userModel({
       prolificId: prolificId,
       purpose,
       taskType,
       inputModality,
+      condition,
     })
 
     return newUser.save()

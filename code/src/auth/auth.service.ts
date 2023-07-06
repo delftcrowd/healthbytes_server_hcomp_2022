@@ -31,12 +31,12 @@ export class AuthService {
     private jwtService: JwtService,
   ) { }
 
-  async register(prolificId: string, purpose: Purpose, taskType: TaskTypes, inputModality: InputModality): Promise<User | any> {
+  async register(prolificId: string, purpose: Purpose, taskType: TaskTypes, inputModality: InputModality, condition?: string): Promise<User | any> {
     const existingUser = await this.userService.findByProlificId(prolificId)
 
     if (existingUser) throw new UnprocessableEntityException('ProlificId already registered')
 
-    const newUser = await this.userService.create(prolificId, purpose, taskType, inputModality)
+    const newUser = await this.userService.create(prolificId, purpose, taskType, inputModality, condition)
 
     return getUserDetails(newUser)
   }
