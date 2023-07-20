@@ -36,6 +36,9 @@ export class Task {
 
   @Prop()
   complete: boolean
+
+  @Prop({ default: Date.now })
+  updated: Date
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task).index({ taskType: 1, user: 1 }, { unique: true })
@@ -54,6 +57,7 @@ export class BirdQuestions {
   questionNumber: number
   complete: boolean
   state: string
+  updated: Date
 
   @Prop({ type: [TaskBirdBeakSchema], required: true })
   birds: TaskBirdBeak[]
@@ -71,6 +75,7 @@ export class MovieQuestions {
   questionNumber: number
   complete: boolean
   state: string
+  updated: Date
 
   @Prop({ type: [TaskMovieReviewSchema], required: true })
   movieReviews: TaskMovieReview[]
@@ -89,6 +94,7 @@ export class PersonQuestions {
   questionNumber: number
   complete: boolean
   state: string
+  updated: Date
 
   @Prop({ type: [TaskPersonSchema], required: true })
   midnamePersons: TaskPerson[]

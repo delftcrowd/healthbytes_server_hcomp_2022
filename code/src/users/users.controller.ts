@@ -22,6 +22,7 @@ export class UserController {
   @Public()
   @Post('completeEntryQuestionnaire')
   completeEntryQuestionnaire(@Query('pid') prolificId) {
+    console.debug("request received in completeEntryQuestionnaire endpoint", prolificId)
     this.userService.completeEntryQuestionnaire(prolificId)
   }
 
@@ -34,6 +35,7 @@ export class UserController {
   @Public()
   @Post('completeExitQuestionnaire')
   completeExitQuestionnaire(@Query('pid') prolificId) {
+    console.debug("request received in completeExitQuestionnaire endpoint", prolificId)
     this.userService.completeExitQuestionnaire(prolificId)
   }
 

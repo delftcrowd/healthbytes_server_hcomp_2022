@@ -19,14 +19,19 @@ import {
   birdProgressMachine,
   isEqualFive,
   isEqualTen,
+  isEqualTwenty,
+  isEqualThirty,
   isGestureTask,
   isInitialState,
   isLessThanFive,
   isLessThanTen,
+  isLessThanTwenty,
+  isLessThanThirty,
   movieProgressMachine,
   nextTask,
   personProgressMachine,
   taskModel,
+  switchingA0ProgressMachine
 } from './progress/progress'
 
 @Injectable()
@@ -70,11 +75,16 @@ export class TaskService {
           isEqualFive: isEqualFive,
           isLessThanTen: isLessThanTen,
           isEqualTen: isEqualTen,
+          isLessThanTwenty: isLessThanTwenty,
+          isEqualTwenty: isEqualTwenty,
+          isLessThanThirty: isLessThanThirty,
+          isEqualThirty: isEqualThirty,
           isInitialState: isInitialState,
           // isGestureTask: isGestureTask,
         },
       })
       .withContext({
+        condition: taskProgress.condition,
         taskType: taskProgress.taskType,
         taskNumber: taskProgress.questionNumber,
         initialState: taskProgress.state,
@@ -83,22 +93,26 @@ export class TaskService {
 
     return interpret(newMachine)
       .onTransition((state) => {
-        console.log(state.value)
-        console.log(state.context)
+        console.debug(state.value)
+        console.debug(state.context)
       })
       .start()
   }
 
   async createSession(taskProgress: TaskDetails) {
-    switch (taskProgress.taskType) {
-      case 'bird':
-        return this.createSM(taskProgress, birdProgressMachine)
-      case 'movie':
-        return this.createSM(taskProgress, movieProgressMachine)
-      case 'person':
-        return this.createSM(taskProgress, personProgressMachine)
-      default:
-        return null
+    if (taskProgress.condition == "hcomp") {
+      switch (taskProgress.taskType) {
+        case 'bird':
+          return this.createSM(taskProgress, birdProgressMachine)
+        case 'movie':
+          return this.createSM(taskProgress, movieProgressMachine)
+        case 'person':
+          return this.createSM(taskProgress, personProgressMachine)
+        default:
+          return null
+      }
+    } else {
+      return this.createSM(taskProgress, switchingA0ProgressMachine)
     }
   }
 
@@ -114,12 +128,18 @@ export class TaskService {
     if (!(user.prolificId in this.userProgress)) {
       throw new BadRequestException('User has no tasks')
     }
+    let questionThreshold = 10
+
+    const condition = this.userProgress[user.prolificId].condition
+    if (condition == "switching") {
+      questionThreshold = 30
+    }
 
     if (
-      !['task.midname', 'task.profession', 'task.movie', 'task.bird'].some(
+      !['task.midname', 'task.profession', 'task.movie', 'task.movieStart', 'task.movieMid', 'task.movieEnd', 'task.bird', 'task.birdStart', 'task.birdMid', 'task.birdEnd'].some(
         this.userState[user.prolificId].state.matches,
       ) &&
-      this.userProgress[user.prolificId].questionNumber >= 10
+      this.userProgress[user.prolificId].questionNumber >= questionThreshold
     ) {
       throw new ForbiddenException('No more questions to answer')
     }
@@ -150,7 +170,7 @@ export class TaskService {
 
     const state = this.userState[user.prolificId]
 
-    if (!state.state.matches('task') || state.state.matches('task.taskEnd')) {
+    if (!state.state.matches('task') || state.state.matches('task.taskEnd') || state.state.matches('task.startMidLandingPage') || state.state.matches('task.midEndLandingPage')) {
       state.send('NEXT')
 
       this.syncProgress(user)
@@ -185,6 +205,7 @@ export class TaskService {
             state: this.userProgress[pid].state,
             questionNumber: this.userProgress[pid].questionNumber,
             complete: this.userProgress[pid].complete,
+            updated: new Date
           },
         },
       )
@@ -329,14 +350,25 @@ export class TaskService {
   private async generateProgress(userId: string): Promise<TaskDocument> {
     const user = await this.userService.findById(userId)
     const type = user.taskType
-
+    const purpose = user.purpose
+    let questionCount = 0
     let model: Task = null
+
+    switch (purpose ) {
+      case "hcomp":
+        questionCount = 10
+        break
+      case 'switching':
+        questionCount = 30
+        break
+    }
+
     switch (type) {
       case 'bird':
-        model = await this.generateBirdQuestions(userId)
+        model = await this.generateBirdQuestions(userId, 10)
         break
       case 'movie':
-        model = await this.generateMovieQuestions(userId)
+        model = await this.generateMovieQuestions(userId, questionCount)
         break
       case 'person':
         model = await this.generatePersonQuestions(userId)
@@ -348,7 +380,7 @@ export class TaskService {
     // this.taskModel.findOneAndReplace({ user: user }, newUserProgress, { new: true, upsert: true })
   }
 
-  private async generateBirdQuestions(user: string): Promise<BirdQuestions> {
+  private async generateBirdQuestions(user: string, questionCount: number): Promise<BirdQuestions> {
     await this._initialize()
     return {
       user,
@@ -357,11 +389,12 @@ export class TaskService {
       state: 'landingPage',
       complete: false,
       taskType: 'bird',
-      birds: this.getRandom(this.birds, 10),
+      birds: this.getRandom(this.birds, questionCount),
+      updated: new Date
     }
   }
 
-  private async generateMovieQuestions(user: string): Promise<MovieQuestions> {
+  private async generateMovieQuestions(user: string, questionCount: number): Promise<MovieQuestions> {
     await this._initialize()
 
     return {
@@ -371,7 +404,8 @@ export class TaskService {
       state: 'landingPage',
       complete: false,
       taskType: 'movie',
-      movieReviews: this.getRandom(this.movieReviews, 10),
+      movieReviews: this.getRandom(this.movieReviews, questionCount),
+      updated: new Date
     }
   }
 
@@ -387,6 +421,7 @@ export class TaskService {
       taskType: 'person',
       midnamePersons: this.shuffleArray(this.midnamePersons.slice(0)),
       professionPersons: this.shuffleArray(this.professionPersons.slice(0)),
+      updated: new Date
     }
   }
 

@@ -44,6 +44,7 @@ export class UserService {
   }
 
   completeEntryQuestionnaire(prolificId: string) {
+    console.debug("setting completeEntryQuestionnaire flag")
     return this.userModel.updateOne({ prolificId }, { $set: { entrySurveyCompleted: true } }).exec()
   }
 

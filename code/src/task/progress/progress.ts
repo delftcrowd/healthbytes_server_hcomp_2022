@@ -1,3 +1,4 @@
+import { StateMachine } from 'xstate'
 import { createModel } from 'xstate/lib/model'
 
 export const nextTask = (context: MyContext) => context.taskNumber + 1
@@ -8,6 +9,22 @@ export const isLessThanTen = (context: MyContext) => {
 
 export const isEqualTen = (context: MyContext) => {
   return context.taskNumber >= 9
+}
+
+export const isLessThanTwenty = (context: MyContext) => {
+  return context.taskNumber < 19
+}
+
+export const isEqualTwenty = (context: MyContext) => {
+  return context.taskNumber >= 19
+}
+
+export const isLessThanThirty = (context: MyContext) => {
+  return context.taskNumber < 29
+}
+
+export const isEqualThirty = (context: MyContext) => {
+  return context.taskNumber >= 29
 }
 
 export const isLessThanFive = (context: MyContext) => {
@@ -32,6 +49,7 @@ export interface MyContext {
   inputModality?: 'gesture' | 'normal'
   taskNumber: number
   initialState: string
+  condition: string
 }
 
 export type NextEvent = {
@@ -63,8 +81,16 @@ interface StateMachineTask {
   states: {
     taskStart: {}
     taskEnd: {}
+    startMidLandingPage?: {}
+    midEndLandingPage?: {}
     movie?: {}
+    movieStart?: {}
+    movieMid?: {}
+    movieEnd?: {}
     bird?: {}
+    birdStart?: {}
+    birdMid?: {}
+    birdEnd?: {}
     profession?: {}
     midname?: {}
     [stateName: string]: any
@@ -177,9 +203,93 @@ const movieTask: StateMachineTask = {
   },
 }
 
+// TODO Decide if this needs to be a new machine for every condition, or a single machine that handles all of it
+const switchingTaskA0: StateMachineTask = {
+  initial: 'taskStart',
+  states: {
+    taskStart: {
+      always: [
+        { target: 'taskEnd', cond: { type: 'isInitialState', targetState: 'task.taskEnd' } },
+        { target: 'movieStart' },
+      ],
+    },
+    movieStart: {
+      on: {
+        NEXT: [
+          {
+            actions: 'increase',
+            cond: 'isLessThanTen',
+            target: 'movieStart',
+            internal: false,
+          },
+          {
+            cond: 'isEqualTen',
+            target: 'startMidLandingPage',
+          },
+        ],
+      },
+    },
+    startMidLandingPage: {
+      on: {
+        NEXT: [
+          {
+            actions: 'increase',
+            target: 'movieMid',
+            internal: false,
+          }
+        ]
+      }
+    },
+    movieMid: {
+      on: {
+        NEXT: [
+          {
+            actions: 'increase',
+            cond: 'isLessThanTwenty',
+            target: 'movieMid',
+            internal: false,
+          },
+          {
+            cond: 'isEqualTwenty',
+            target: 'midEndLandingPage',
+          },
+        ],
+      },
+    },
+    midEndLandingPage: {
+      on: {
+        NEXT: [
+          {
+            actions: 'increase',
+            target: 'movieEnd',
+            internal: false,
+          }
+        ]
+      }
+    },
+    movieEnd: {
+      on: {
+        NEXT: [
+          {
+            actions: 'increase',
+            cond: 'isLessThanThirty',
+            target: 'movieEnd',
+            internal: false,
+          },
+          {
+            cond: 'isEqualThirty',
+            target: 'taskEnd',
+          },
+        ],
+      },
+    },
+    taskEnd: {},
+  },
+}
+
 const generateMachine = (taskState: StateMachineTask) => {
   return taskModel.createMachine({
-    context: { taskType: 'bird', taskNumber: 0, initialState: '' },
+    context: { taskType: 'bird', taskNumber: 0, initialState: '', condition: '' },
     tsTypes: {} as import('./progress.typegen').Typegen0,
     schema: { context: {} as MyContext, events: {} as NextEvent | InitEvent },
     id: 'progress',
@@ -251,6 +361,7 @@ const generateMachine = (taskState: StateMachineTask) => {
 export const birdProgressMachine = generateMachine(birdTask)
 export const movieProgressMachine = generateMachine(movieTask)
 export const personProgressMachine = generateMachine(personTask)
+export const switchingA0ProgressMachine = generateMachine(switchingTaskA0)
 
 // const { initialState } = taskProgressMachine
 
