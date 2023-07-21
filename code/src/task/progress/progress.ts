@@ -203,8 +203,7 @@ const movieTask: StateMachineTask = {
   },
 }
 
-// TODO Decide if this needs to be a new machine for every condition, or a single machine that handles all of it
-const switchingTaskA0: StateMachineTask = {
+const switchingMovieTask: StateMachineTask = {
   initial: 'taskStart',
   states: {
     taskStart: {
@@ -274,6 +273,89 @@ const switchingTaskA0: StateMachineTask = {
             actions: 'increase',
             cond: 'isLessThanThirty',
             target: 'movieEnd',
+            internal: false,
+          },
+          {
+            cond: 'isEqualThirty',
+            target: 'taskEnd',
+          },
+        ],
+      },
+    },
+    taskEnd: {},
+  },
+}
+
+const switchingBirdTask: StateMachineTask = {
+  initial: 'taskStart',
+  states: {
+    taskStart: {
+      always: [
+        { target: 'taskEnd', cond: { type: 'isInitialState', targetState: 'task.taskEnd' } },
+        { target: 'birdStart' },
+      ],
+    },
+    birdStart: {
+      on: {
+        NEXT: [
+          {
+            actions: 'increase',
+            cond: 'isLessThanTen',
+            target: 'birdStart',
+            internal: false,
+          },
+          {
+            cond: 'isEqualTen',
+            target: 'startMidLandingPage',
+          },
+        ],
+      },
+    },
+    startMidLandingPage: {
+      on: {
+        NEXT: [
+          {
+            actions: 'increase',
+            target: 'birdMid',
+            internal: false,
+          }
+        ]
+      }
+    },
+    birdMid: {
+      on: {
+        NEXT: [
+          {
+            actions: 'increase',
+            cond: 'isLessThanTwenty',
+            target: 'birdMid',
+            internal: false,
+          },
+          {
+            cond: 'isEqualTwenty',
+            target: 'midEndLandingPage',
+          },
+        ],
+      },
+    },
+    midEndLandingPage: {
+      on: {
+        NEXT: [
+          {
+            actions: 'increase',
+            target: 'birdEnd',
+            internal: false,
+          }
+        ]
+      }
+    },
+    birdEnd: {
+      on: {
+        NEXT: [
+          {
+            actions: 'increase',
+            cond: 'isLessThanThirty',
+            target: 'birdEnd',
             internal: false,
           },
           {
@@ -361,7 +443,8 @@ const generateMachine = (taskState: StateMachineTask) => {
 export const birdProgressMachine = generateMachine(birdTask)
 export const movieProgressMachine = generateMachine(movieTask)
 export const personProgressMachine = generateMachine(personTask)
-export const switchingA0ProgressMachine = generateMachine(switchingTaskA0)
+export const switchingMovieProgressMachine = generateMachine(switchingMovieTask)
+export const switchingBirdProgressMachine = generateMachine(switchingBirdTask)
 
 // const { initialState } = taskProgressMachine
 

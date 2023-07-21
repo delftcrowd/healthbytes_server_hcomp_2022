@@ -31,7 +31,8 @@ import {
   nextTask,
   personProgressMachine,
   taskModel,
-  switchingA0ProgressMachine
+  switchingMovieProgressMachine,
+  switchingBirdProgressMachine
 } from './progress/progress'
 
 @Injectable()
@@ -100,19 +101,23 @@ export class TaskService {
   }
 
   async createSession(taskProgress: TaskDetails) {
-    if (taskProgress.condition == "hcomp") {
-      switch (taskProgress.taskType) {
-        case 'bird':
+    switch (taskProgress.taskType) {
+      case 'bird':
+        if (taskProgress.purpose == "hcomp") {
           return this.createSM(taskProgress, birdProgressMachine)
-        case 'movie':
+        } else if (taskProgress.purpose == "switching") {
+          return this.createSM(taskProgress, switchingBirdProgressMachine)
+        }
+      case 'movie':
+        if (taskProgress.purpose == "hcomp") {
           return this.createSM(taskProgress, movieProgressMachine)
-        case 'person':
-          return this.createSM(taskProgress, personProgressMachine)
-        default:
-          return null
-      }
-    } else {
-      return this.createSM(taskProgress, switchingA0ProgressMachine)
+        } else if (taskProgress.purpose == "switching") {
+          return this.createSM(taskProgress, switchingMovieProgressMachine)
+        }
+      case 'person':
+        return this.createSM(taskProgress, personProgressMachine)
+      default:
+        return null
     }
   }
 
@@ -365,7 +370,7 @@ export class TaskService {
 
     switch (type) {
       case 'bird':
-        model = await this.generateBirdQuestions(userId, 10)
+        model = await this.generateBirdQuestions(userId, questionCount)
         break
       case 'movie':
         model = await this.generateMovieQuestions(userId, questionCount)

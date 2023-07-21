@@ -50,4 +50,32 @@ export class UserController {
     let user: UserDetails = req.user
     return this.userService.isConsentRevoked(user.prolificId)
   }
+
+  @Post('toggleTaskType')
+  async toggleTaskType(@Request() req) {
+    let user: UserDetails = req.user
+    let newTaskType = ''
+    if (user.taskType !== "person") {
+      if (user.taskType == 'movie') {
+        newTaskType = 'bird'
+      } else if (user.taskType == 'bird') {
+        newTaskType = 'movie'
+      }
+    }
+
+    return this.userService.toggleTaskType(user.prolificId, newTaskType)
+  }
+
+  @Post('toggleInputModality')
+  async toggleInputModality(@Request() req) {
+    let user: UserDetails = req.user
+    let newModality = ''
+    if (user.inputModality == 'gesture') {
+      newModality = 'normal'
+    } else if (user.inputModality == 'normal') {
+      newModality = 'gesture'
+    }
+
+    return this.userService.toggleInputModality(user.prolificId, newModality)
+  }
 }

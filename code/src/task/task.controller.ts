@@ -40,7 +40,6 @@ export class TaskController {
     if (!(await this.taskService.hasTask(user.id))) {
       await this.taskService.createUserTask(user)
     }
-
     return await this.taskService.getTask(user.id)
   }
 

@@ -43,12 +43,21 @@ export class UserService {
     return (await this.userModel.findOne({ prolificId }).exec()).exitSurveyCompleted
   }
 
+  async toggleInputModality(prolificId: string, inputModality: string) {
+    return await this.userModel.findOneAndUpdate({ prolificId }, { $set: {inputModality: inputModality}}).exec()
+  }
+
+  async toggleTaskType(prolificId: string, taskType: string) {
+    return await this.userModel.findOneAndUpdate({ prolificId }, { $set: {taskType: taskType}}).exec()
+  }
+
   completeEntryQuestionnaire(prolificId: string) {
     console.debug("setting completeEntryQuestionnaire flag")
     return this.userModel.updateOne({ prolificId }, { $set: { entrySurveyCompleted: true } }).exec()
   }
 
   completeExitQuestionnaire(prolificId: string) {
+    console.debug("setting completeExitQuestionnaire flag")
     return this.userModel.updateOne({ prolificId }, { $set: { exitSurveyCompleted: true } }).exec()
   }
 
