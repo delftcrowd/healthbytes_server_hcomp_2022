@@ -44,6 +44,30 @@ export const isGestureTask = (context: MyContext, event, { cond }) => {
   return context.inputModality == 'gesture'
 }
 
+export const requiresTaskSwitchToBirdMid = (context: MyContext, event, { cond }) => {
+  return ["B0", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "A8", "A9", "A10", "A11", "A12", "A13", "A14", "A15"].includes(context.condition)
+}
+
+export const requiresTaskSwitchToMovieMid = (context: MyContext, event, { cond }) => {
+  return ["A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7", "B8", "B9", "B10", "B11", "B12", "B13", "B14", "B15"].includes(context.condition)
+}
+
+export const requiresTaskSwitchToMovieEnd = (context: MyContext, event, { cond }) => {
+  return ["A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7", "B0", "B1", "B2", "B3", "B4", "B5", "B6", "B7"].includes(context.condition)
+}
+
+export const requiresTaskSwitchToBirdEnd = (context: MyContext, event, { cond }) => {
+  return ["A8", "A9", "A10", "A11", "A12", "A13", "A14", "A15", "B8", "B9", "B10", "B11", "B12", "B13", "B14", "B15"].includes(context.condition)
+}
+
+export const isMovieStart = (context: MyContext, event, { cond }) => {
+  return ["A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7", "B0", "B1", "B2", "B3", "B4", "B5", "B6", "B7"].includes(context.condition)
+}
+
+export const isBirdStart = (context: MyContext, event, { cond }) => {
+  return ["A8", "A9", "A10", "A11", "A12", "A13", "A14", "A15", "B8", "B9", "B10", "B11", "B12", "B13", "B14", "B15"].includes(context.condition)
+}
+
 export interface MyContext {
   taskType?: 'person' | 'movie' | 'bird'
   inputModality?: 'gesture' | 'normal'
@@ -67,15 +91,15 @@ export const taskModel = createModel({} as MyContext, {
   },
 })
 
-export const enum stages {
-  landingPage,
-  entryQuestionnaire,
-  tutorial,
-  task,
-  taskStart,
-  taskEnd,
-  exitQuestionnaire,
-}
+// export const enum stages {
+//   landingPage,
+//   entryQuestionnaire,
+//   tutorial,
+//   task,
+//   taskStart,
+//   taskEnd,
+//   exitQuestionnaire,
+// }
 interface StateMachineTask {
   initial: 'taskStart'
   states: {
@@ -209,7 +233,8 @@ const switchingMovieTask: StateMachineTask = {
     taskStart: {
       always: [
         { target: 'taskEnd', cond: { type: 'isInitialState', targetState: 'task.taskEnd' } },
-        { target: 'movieStart' },
+        { target: 'movieStart', cond: {type: 'isMovieStart', targetState: 'task.movieStart'} },
+        { target: 'birdStart', cond: {type: 'isBirdStart', targetState: 'task.birdStart'} },
       ],
     },
     movieStart: {
@@ -228,13 +253,36 @@ const switchingMovieTask: StateMachineTask = {
         ],
       },
     },
+    birdStart: {
+      on: {
+        NEXT: [
+          {
+            actions: 'increase',
+            cond: 'isLessThanTen',
+            target: 'birdStart',
+            internal: false,
+          },
+          {
+            cond: 'isEqualTen',
+            target: 'startMidLandingPage',
+          },
+        ],
+      },
+    },
     startMidLandingPage: {
       on: {
         NEXT: [
           {
             actions: 'increase',
+            cond: 'requiresTaskSwitchToMovieMid',
             target: 'movieMid',
             internal: false,
+          },
+          {
+            actions: 'increase',
+            cond: 'requiresTaskSwitchToBirdMid',
+            target: 'birdMid',
+            internal: false
           }
         ]
       }
@@ -255,14 +303,37 @@ const switchingMovieTask: StateMachineTask = {
         ],
       },
     },
+    birdMid: {
+      on: {
+        NEXT: [
+          {
+            actions: 'increase',
+            cond: 'isLessThanTwenty',
+            target: 'birdMid',
+            internal: false,
+          },
+          {
+            cond: 'isEqualTwenty',
+            target: 'midEndLandingPage',
+          },
+        ],
+      },
+    },
     midEndLandingPage: {
       on: {
         NEXT: [
           {
             actions: 'increase',
+            cond: 'requiresTaskSwitchToMovieEnd',
             target: 'movieEnd',
             internal: false,
-          }
+          },
+          {
+            actions: 'increase',
+            cond: 'requiresTaskSwitchToBirdEnd',
+            target: 'birdEnd',
+            internal: false,
+          },
         ]
       }
     },
@@ -273,6 +344,22 @@ const switchingMovieTask: StateMachineTask = {
             actions: 'increase',
             cond: 'isLessThanThirty',
             target: 'movieEnd',
+            internal: false,
+          },
+          {
+            cond: 'isEqualThirty',
+            target: 'taskEnd',
+          },
+        ],
+      },
+    },
+    birdEnd: {
+      on: {
+        NEXT: [
+          {
+            actions: 'increase',
+            cond: 'isLessThanThirty',
+            target: 'birdEnd',
             internal: false,
           },
           {
@@ -424,6 +511,7 @@ const generateMachine = (taskState: StateMachineTask) => {
             target: 'exitQuestionnaire',
           },
         },
+        // Typegen does not process the states from this, which leads to a faulty typgen.ts file...
         ...taskState,
       },
       exitQuestionnaire: {
@@ -444,7 +532,7 @@ export const birdProgressMachine = generateMachine(birdTask)
 export const movieProgressMachine = generateMachine(movieTask)
 export const personProgressMachine = generateMachine(personTask)
 export const switchingMovieProgressMachine = generateMachine(switchingMovieTask)
-export const switchingBirdProgressMachine = generateMachine(switchingBirdTask)
+// export const switchingBirdProgressMachine = generateMachine(switchingBirdTask)
 
 // const { initialState } = taskProgressMachine
 

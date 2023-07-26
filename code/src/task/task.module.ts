@@ -8,6 +8,7 @@ import {
   BirdQuestionsSchema,
   MovieQuestionsSchema,
   PersonQuestionsSchema,
+  BirdAndMovieQuestionsSchema,
   TaskSchema,
 } from 'src/schemas/task-progress.schema'
 import { UsersModule } from 'src/users/users.module'
@@ -25,6 +26,7 @@ import { TaskService } from './task.service'
           { name: 'bird', schema: BirdQuestionsSchema },
           { name: 'movie', schema: MovieQuestionsSchema },
           { name: 'person', schema: PersonQuestionsSchema },
+          { name: 'switching', schema: BirdAndMovieQuestionsSchema}
         ],
       },
     ]),

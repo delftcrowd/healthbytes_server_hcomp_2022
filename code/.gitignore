@@ -36,3 +36,6 @@ lerna-debug.log*
 
 # Environment
 .env
+
+# TypeGen generated files
+src/task/progress/progress.typegen.ts

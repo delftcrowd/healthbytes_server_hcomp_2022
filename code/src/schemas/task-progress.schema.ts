@@ -13,7 +13,7 @@ export type TaskTypes = 'bird' | 'movie' | 'person'
 export type InputModality = 'gesture' | 'normal'
 export type Purpose = 'switching' | 'hcomp'
 
-@Schema({ collection: 'progress', discriminatorKey: 'taskType' })
+@Schema({ collection: 'progress', discriminatorKey: 'purpose' })
 export class Task {
   @Prop({
     type: String,
@@ -37,15 +37,49 @@ export class Task {
   @Prop()
   complete: boolean
 
+  @Prop({
+    type: String,
+    required: true,
+    enum: ['hcomp', 'switching']
+  })
+  purpose: Purpose
+
   @Prop({ default: Date.now })
   updated: Date
 }
 
-export const TaskSchema = SchemaFactory.createForClass(Task).index({ taskType: 1, user: 1 }, { unique: true })
+export const TaskSchema = SchemaFactory.createForClass(Task).index({ purpose: 1, user: 1 }, { unique: true })
 
 // =============================================================================
 // QUESTIONS
 // =============================================================================
+// -----------------------------------------------------------------------------
+// BIRD + MOVIE
+// -----------------------------------------------------------------------------
+@Schema()
+export class BirdAndMovieQuestions {
+  taskType: TaskTypes
+  user: User | string
+  answers: string[]
+  questionNumber: number
+  complete: boolean
+  state: string
+  updated: Date
+  purpose: Purpose
+
+  @Prop({ type: [TaskBirdBeakSchema], required: true })
+  birds: TaskBirdBeak[]
+
+  @Prop({ type: [TaskMovieReviewSchema], required: true })
+  movieReviews: TaskMovieReview[]
+}
+export const BirdAndMovieQuestionsSchema = SchemaFactory.createForClass(BirdAndMovieQuestions)
+
+// -----------------------------------------------------------------------------
+// MOVIE + BIRD
+// -----------------------------------------------------------------------------
+
+
 // -----------------------------------------------------------------------------
 // BIRD
 // -----------------------------------------------------------------------------
@@ -58,6 +92,7 @@ export class BirdQuestions {
   complete: boolean
   state: string
   updated: Date
+  purpose: Purpose
 
   @Prop({ type: [TaskBirdBeakSchema], required: true })
   birds: TaskBirdBeak[]
@@ -76,6 +111,7 @@ export class MovieQuestions {
   complete: boolean
   state: string
   updated: Date
+  purpose: Purpose
 
   @Prop({ type: [TaskMovieReviewSchema], required: true })
   movieReviews: TaskMovieReview[]
@@ -95,6 +131,7 @@ export class PersonQuestions {
   complete: boolean
   state: string
   updated: Date
+  purpose: Purpose
 
   @Prop({ type: [TaskPersonSchema], required: true })
   midnamePersons: TaskPerson[]

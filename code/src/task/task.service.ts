@@ -7,12 +7,12 @@ import {
 } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
-import { getBirdQuestions, getMovieQuestions, getPersonQuestions, getTaskDetails, TaskDetails } from 'src/dto'
+import { getBirdAndMovieQuestions, getBirdQuestions, getMovieQuestions, getPersonQuestions, getTaskDetails, TaskDetails } from 'src/dto'
 import { Pose, PoseDocument, PoseInstance } from 'src/schemas/pose.schema'
 import { TaskBirdBeak, TaskBirdBeakDocument } from 'src/schemas/task-bird.schema'
 import { TaskMovieReview, TaskMovieReviewDocument } from 'src/schemas/task-movie.schema'
 import { TaskPerson, TaskPersonDocument } from 'src/schemas/task-person.schema'
-import { BirdQuestions, MovieQuestions, PersonQuestions, Task, TaskDocument } from 'src/schemas/task-progress.schema'
+import { BirdAndMovieQuestions, BirdQuestions, MovieQuestions, PersonQuestions, Purpose, Task, TaskDocument, TaskTypes } from 'src/schemas/task-progress.schema'
 import { UserDetails, UserService } from 'src/users/users.service'
 import { interpret, InterpreterFrom } from 'xstate'
 import {
@@ -21,7 +21,7 @@ import {
   isEqualTen,
   isEqualTwenty,
   isEqualThirty,
-  isGestureTask,
+  // isGestureTask,
   isInitialState,
   isLessThanFive,
   isLessThanTen,
@@ -32,7 +32,13 @@ import {
   personProgressMachine,
   taskModel,
   switchingMovieProgressMachine,
-  switchingBirdProgressMachine
+  // switchingBirdProgressMachine,
+  requiresTaskSwitchToBirdEnd,
+  requiresTaskSwitchToBirdMid,
+  requiresTaskSwitchToMovieEnd,
+  requiresTaskSwitchToMovieMid,
+  isBirdStart,
+  isMovieStart,
 } from './progress/progress'
 
 @Injectable()
@@ -81,6 +87,12 @@ export class TaskService {
           isLessThanThirty: isLessThanThirty,
           isEqualThirty: isEqualThirty,
           isInitialState: isInitialState,
+          requiresTaskSwitchToBirdEnd: requiresTaskSwitchToBirdEnd,
+          requiresTaskSwitchToBirdMid: requiresTaskSwitchToBirdMid,
+          requiresTaskSwitchToMovieEnd: requiresTaskSwitchToMovieEnd,
+          requiresTaskSwitchToMovieMid: requiresTaskSwitchToMovieMid,
+          isMovieStart: isMovieStart,
+          isBirdStart: isBirdStart
           // isGestureTask: isGestureTask,
         },
       })
@@ -106,7 +118,8 @@ export class TaskService {
         if (taskProgress.purpose == "hcomp") {
           return this.createSM(taskProgress, birdProgressMachine)
         } else if (taskProgress.purpose == "switching") {
-          return this.createSM(taskProgress, switchingBirdProgressMachine)
+          return this.createSM(taskProgress, switchingMovieProgressMachine)
+          // return this.createSM(taskProgress, switchingBirdProgressMachine)
         }
       case 'movie':
         if (taskProgress.purpose == "hcomp") {
@@ -189,12 +202,16 @@ export class TaskService {
   }
 
   async updateUserProgress(taskProgress: TaskDetails) {
+    // if (userTaskType !== null && userTaskType !== undefined) {
+    //   taskProgress.taskType = userTaskType
+    // }
     if (!(taskProgress.user in this.userProgress)) {
       this.userProgress[taskProgress.user.toString()] = taskProgress
     }
     if (!(taskProgress.user in this.userState)) {
       this.userState[taskProgress.user.toString()] = await this.createSession(taskProgress)
     }
+    
   }
 
   async syncProgress(user: UserDetails) {
@@ -210,6 +227,7 @@ export class TaskService {
             state: this.userProgress[pid].state,
             questionNumber: this.userProgress[pid].questionNumber,
             complete: this.userProgress[pid].complete,
+            taskType: this.userProgress[pid].taskType,
             updated: new Date
           },
         },
@@ -225,6 +243,7 @@ export class TaskService {
     return !!(await this.taskModel.exists({ user }).exec())
   }
 
+  // How to get updateUserProgress to be aware of the taskType from user object to put on TaskDetails
   async getTask(user: string) {
     const taskProgress = getTaskDetails(
       await this.taskModel.findOne({ user }).populate('user', 'prolificId inputModality purpose condition -_id'),
@@ -240,15 +259,77 @@ export class TaskService {
   async getQuestion(userId: string) {
     const task = await this.taskModel.findOne({ user: userId }).exec()
 
-    switch (task.taskType) {
-      case 'bird':
-        return this.getBirdQuestion(userId)
-      case 'movie':
-        return this.getMovieQuestion(userId)
-      case 'person':
-        return this.getPersonQuestion(userId)
-      default:
-        return null
+    switch (task.purpose) {
+      case 'hcomp':
+        switch (task.taskType) {
+          case 'bird':
+            return this.getBirdQuestion(userId)
+          case 'movie':
+            return this.getMovieQuestion(userId)
+          case 'person':
+            return this.getPersonQuestion(userId)
+          default:
+            return null
+        }
+      case 'switching':
+        return this.getBirdAndMovieQuestion(userId)
+        // switch (task.taskType) {
+        //   case 'bird':
+            
+        //   case 'movie':
+        //     return this.getMovieQuestion(userId)
+        //   default:
+        //     return null
+        // }
+    }
+
+    // switch (task.taskType) {
+    //   case 'bird':
+    //     return this.getBirdQuestion(userId)
+    //   case 'movie':
+    //     return this.getMovieQuestion(userId)
+    //   case 'person':
+    //     return this.getPersonQuestion(userId)
+    //   default:
+    //     return null
+    // }
+  }
+
+  async getBirdAndMovieQuestion(userId: string) {
+    const questions = getBirdAndMovieQuestions(
+      (await this.taskModel.findOne({ user: userId }).exec()) as unknown as BirdAndMovieQuestions,
+      )
+    if (questions.answers.length >= (questions.birds.length + questions.movieReviews.length)) {
+      throw new MethodNotAllowedException('No more questions available')
+    }
+
+    // Determine condition from length of movieReviews and birds
+    if (questions.movieReviews.length == 30) {
+      // This is an A0-A7 condition
+      return this.getQuestionFromMovie(questions.movieReviews[questions.answers.length])
+    } else if (questions.birds.length == 30) {
+      // This is an A8-A15 condition
+      return this.getQuestionFromBird(questions.birds[questions.answers.length])
+    } else if (questions.movieReviews.length == 20) {
+      // This is a B0-B7 condition, need to see where the answer length is at
+      if (questions.answers.length < 10) {
+        return this.getQuestionFromMovie(questions.movieReviews[questions.answers.length])
+      } else if (questions.answers.length >= 20) {
+        // Offset for 10 questions being on birds
+        return this.getQuestionFromMovie(questions.movieReviews[questions.answers.length - 10])
+      } else if (questions.answers.length >= 10 && questions.answers.length < 20) {
+        return this.getQuestionFromBird(questions.birds[questions.answers.length - 10])
+      }
+    } else if (questions.birds.length == 20) {
+      // This is a B8-B15 condition
+      if (questions.answers.length < 10) {
+        return this.getQuestionFromBird(questions.birds[questions.answers.length])
+      } else if (questions.answers.length >= 20) {
+        // Offset for 10 questions being on birds
+        return this.getQuestionFromBird(questions.birds[questions.answers.length - 10])
+      } else if (questions.answers.length >= 10 && questions.answers.length < 20) {
+        return this.getQuestionFromMovie(questions.movieReviews[questions.answers.length - 10])
+      }
     }
   }
 
@@ -356,36 +437,83 @@ export class TaskService {
     const user = await this.userService.findById(userId)
     const type = user.taskType
     const purpose = user.purpose
+    const condition = user.condition
     let questionCount = 0
     let model: Task = null
 
     switch (purpose ) {
       case "hcomp":
         questionCount = 10
+        switch (type) {
+          case 'bird':
+            model = await this.generateBirdQuestions(userId, questionCount, purpose)
+            break
+          case 'movie':
+            model = await this.generateMovieQuestions(userId, questionCount, purpose)
+            break
+          case 'person':
+            model = await this.generatePersonQuestions(userId, purpose)
+            break
+        }
         break
       case 'switching':
-        questionCount = 30
+        if (condition.slice(0,1) == "A") {
+          questionCount = 30
+          switch (type) {
+            case 'bird':
+              model = await this.generateBirdQuestions(userId, questionCount, purpose)
+              break
+            case 'movie':
+              model = await this.generateMovieQuestions(userId, questionCount, purpose)
+              break
+            case 'person':
+              model = await this.generatePersonQuestions(userId, purpose)
+              break
+          }
+        } else if (["B0", "B1", "B2", "B3", "B4", "B5", "B6", "B7"].includes(condition)) {
+          model = await this.generateBirdAndMovieQuestions(userId, 10, 20, purpose, user.taskType)
+          break
+        } else if (["B8", "B9", "B10", "B11", "B12", "B13", "B14", "B15"].includes(condition)) {
+          model = await this.generateBirdAndMovieQuestions(userId, 20, 10, purpose, user.taskType)
+          break
+        }
         break
     }
-
-    switch (type) {
-      case 'bird':
-        model = await this.generateBirdQuestions(userId, questionCount)
-        break
-      case 'movie':
-        model = await this.generateMovieQuestions(userId, questionCount)
-        break
-      case 'person':
-        model = await this.generatePersonQuestions(userId)
-        break
-    }
-
+    // switch (type) {
+    //   case 'bird':
+    //     model = await this.generateBirdQuestions(userId, questionCount, purpose)
+    //     break
+    //   case 'movie':
+    //     model = await this.generateMovieQuestions(userId, questionCount, purpose)
+    //     break
+    //   case 'person':
+    //     model = await this.generatePersonQuestions(userId, purpose)
+    //     break
+    // }
+    // const newUserProgress = this.taskModel(model)
     const newUserProgress = new this.taskModel(model)
     return newUserProgress.save()
     // this.taskModel.findOneAndReplace({ user: user }, newUserProgress, { new: true, upsert: true })
   }
 
-  private async generateBirdQuestions(user: string, questionCount: number): Promise<BirdQuestions> {
+  private async generateBirdAndMovieQuestions(user: string, birdQuestionCount: number, movieQuestionCount: number, purpose: Purpose, startingTaskType: TaskTypes): Promise<BirdAndMovieQuestions> {
+    await this._initialize()
+    return {
+      user,
+      answers: [],
+      questionNumber: 0,
+      state: 'landingPage',
+      complete: false,
+      taskType: startingTaskType,
+      birds: this.getRandom(this.birds, birdQuestionCount),
+      movieReviews: this.getRandom(this.movieReviews, movieQuestionCount),
+      purpose: purpose,
+      updated: new Date
+    }
+  }
+
+  private async generateBirdQuestions(user: string, questionCount: number, purpose: Purpose): Promise<BirdQuestions> {
+  // private async generateBirdQuestions(user: UserDetails, questionCount: number): Promise<BirdQuestions> {
     await this._initialize()
     return {
       user,
@@ -395,11 +523,12 @@ export class TaskService {
       complete: false,
       taskType: 'bird',
       birds: this.getRandom(this.birds, questionCount),
+      purpose: purpose,
       updated: new Date
     }
   }
 
-  private async generateMovieQuestions(user: string, questionCount: number): Promise<MovieQuestions> {
+  private async generateMovieQuestions(user: string, questionCount: number, purpose: Purpose): Promise<MovieQuestions> {
     await this._initialize()
 
     return {
@@ -410,11 +539,12 @@ export class TaskService {
       complete: false,
       taskType: 'movie',
       movieReviews: this.getRandom(this.movieReviews, questionCount),
+      purpose: purpose,
       updated: new Date
     }
   }
 
-  private async generatePersonQuestions(user: string): Promise<PersonQuestions> {
+  private async generatePersonQuestions(user: string, purpose: Purpose): Promise<PersonQuestions> {
     await this._initialize()
 
     return {
@@ -426,6 +556,7 @@ export class TaskService {
       taskType: 'person',
       midnamePersons: this.shuffleArray(this.midnamePersons.slice(0)),
       professionPersons: this.shuffleArray(this.professionPersons.slice(0)),
+      purpose: purpose,
       updated: new Date
     }
   }

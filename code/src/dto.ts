@@ -1,17 +1,17 @@
-import { BirdQuestions, InputModality, MovieQuestions, PersonQuestions, Purpose } from 'src/schemas/task-progress.schema'
+import { BirdAndMovieQuestions, BirdQuestions, InputModality, MovieQuestions, PersonQuestions, Purpose } from 'src/schemas/task-progress.schema'
 import { UserDocument } from 'src/schemas/user.schema'
 import { UserDetails } from 'src/users/users.service'
 import { Task, TaskDocument } from './schemas/task-progress.schema'
 
-export type TaskDetails = Pick<Task, 'taskType' | 'state' | 'questionNumber' | 'complete'> & {
+export type TaskDetails = Pick<Task, 'taskType' | 'state' | 'questionNumber' | 'complete' | 'purpose'> & {
   user: string
   inputModality: InputModality
-  purpose: Purpose
   condition: string
 }
 export type PersonQuestionsDetails = Pick<PersonQuestions, 'midnamePersons' | 'professionPersons' | 'answers'>
 export type MovieQuestionsDetails = Pick<MovieQuestions, 'movieReviews' | 'answers'>
 export type BirdQuestionsDetails = Pick<BirdQuestions, 'birds' | 'answers'>
+export type BirdAndMovieDetails = Pick<BirdAndMovieQuestions, 'birds' | 'movieReviews' | 'answers'>
 export interface PersonTaskResponse {}
 
 export const getUserDetails = (user: UserDocument): UserDetails => {
@@ -33,7 +33,8 @@ export const getTaskDetails = (
     user: userDetails.prolificId,
     taskType: task.taskType,
     inputModality: userDetails.inputModality,
-    purpose: userDetails.purpose,
+    // purpose: userDetails.purpose,
+    purpose: task.purpose,
     condition: userDetails.condition,
     state: task.state,
     questionNumber: task.questionNumber,
@@ -60,5 +61,13 @@ export const getBirdQuestions = (task: BirdQuestions): BirdQuestionsDetails => {
   return {
     answers: task.answers,
     birds: task.birds,
+  }
+}
+
+export const getBirdAndMovieQuestions = (task: BirdAndMovieQuestions): BirdAndMovieDetails => {
+  return {
+    answers: task.answers,
+    birds: task.birds,
+    movieReviews: task.movieReviews,
   }
 }
