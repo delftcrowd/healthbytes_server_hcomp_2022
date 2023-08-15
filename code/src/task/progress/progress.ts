@@ -3,12 +3,20 @@ import { createModel } from 'xstate/lib/model'
 
 export const nextTask = (context: MyContext) => context.taskNumber + 1
 
+export const isLessThanFive = (context: MyContext) => {
+  return context.taskNumber < 4
+}
+
+export const isEqualFive = (context: MyContext) => {
+  return context.taskNumber >= 4
+}
+
 export const isLessThanTen = (context: MyContext) => {
   return context.taskNumber < 9
 }
 
 export const isEqualTen = (context: MyContext) => {
-  return context.taskNumber >= 9
+  return context.taskNumber >= 9 && context.taskNumber <= 10
 }
 
 export const isLessThanTwenty = (context: MyContext) => {
@@ -16,7 +24,7 @@ export const isLessThanTwenty = (context: MyContext) => {
 }
 
 export const isEqualTwenty = (context: MyContext) => {
-  return context.taskNumber >= 19
+  return context.taskNumber >= 19 && context.taskNumber <= 20
 }
 
 export const isLessThanThirty = (context: MyContext) => {
@@ -24,15 +32,31 @@ export const isLessThanThirty = (context: MyContext) => {
 }
 
 export const isEqualThirty = (context: MyContext) => {
-  return context.taskNumber >= 29
+  return context.taskNumber >= 29 && context.taskNumber <= 30
 }
 
-export const isLessThanFive = (context: MyContext) => {
-  return context.taskNumber < 4
+export const isGreaterThanEqualThirtyAndLessThanForty = (context: MyContext) => {
+  return context.taskNumber >= 29 && context.taskNumber < 39
 }
 
-export const isEqualFive = (context: MyContext) => {
-  return context.taskNumber >= 4
+export const isEqualForty = (context: MyContext) => {
+  return context.taskNumber >= 39 && context.taskNumber <= 40
+}
+
+export const isGreaterThanEqualFortyAndLessThanFifty = (context: MyContext) => {
+  return context.taskNumber >= 39 && context.taskNumber < 49
+}
+
+export const isEqualFifty = (context: MyContext) => {
+  return context.taskNumber >= 49 && context.taskNumber <= 50
+}
+
+export const isLessThanSixty = (context: MyContext) => {
+  return context.taskNumber < 59
+}
+
+export const isEqualSixty = (context: MyContext) => {
+  return context.taskNumber >= 59 && context.taskNumber <= 60
 }
 
 export const isInitialState = (context: MyContext, event, { cond }) => {
@@ -68,12 +92,25 @@ export const isBirdStart = (context: MyContext, event, { cond }) => {
   return ["A8", "A9", "A10", "A11", "A12", "A13", "A14", "A15", "B8", "B9", "B10", "B11", "B12", "B13", "B14", "B15"].includes(context.condition)
 }
 
+export const optedOut = (context: MyContext, event, { cond }) => {
+  return !context.optedForOptional
+}
+
+export const optedInAndRequiresMovieStart = (context: MyContext, event, { cond }) => {
+  return context.optedForOptional && ["A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7", "B0", "B1", "B2", "B3", "B4", "B5", "B6", "B7"].includes(context.condition)
+}
+
+export const optedInAndRequiresBirdStart = (context: MyContext, event, { cond }) => {
+  return context.optedForOptional && ["A8", "A9", "A10", "A11", "A12", "A13", "A14", "A15", "B8", "B9", "B10", "B11", "B12", "B13", "B14", "B15"].includes(context.condition)
+}
+
 export interface MyContext {
   taskType?: 'person' | 'movie' | 'bird'
   inputModality?: 'gesture' | 'normal'
   taskNumber: number
   initialState: string
   condition: string
+  optedForOptional: boolean
 }
 
 export type NextEvent = {
@@ -84,22 +121,18 @@ export type InitEvent = {
   type: 'INIT'
 }
 
+export type OptInEvent = {
+  type: 'OPT_IN'
+}
+
 export const taskModel = createModel({} as MyContext, {
   events: {
     NEXT: () => ({}),
     INIT: () => ({}),
+    OPT_IN: () => ({})
   },
 })
 
-// export const enum stages {
-//   landingPage,
-//   entryQuestionnaire,
-//   tutorial,
-//   task,
-//   taskStart,
-//   taskEnd,
-//   exitQuestionnaire,
-// }
 interface StateMachineTask {
   initial: 'taskStart'
   states: {
@@ -107,6 +140,7 @@ interface StateMachineTask {
     taskEnd: {}
     startMidLandingPage?: {}
     midEndLandingPage?: {}
+    optionalLandingPage?: {}
     movie?: {}
     movieStart?: {}
     movieMid?: {}
@@ -227,7 +261,7 @@ const movieTask: StateMachineTask = {
   },
 }
 
-const switchingMovieTask: StateMachineTask = {
+const switchingTask: StateMachineTask = {
   initial: 'taskStart',
   states: {
     taskStart: {
@@ -250,6 +284,16 @@ const switchingMovieTask: StateMachineTask = {
             cond: 'isEqualTen',
             target: 'startMidLandingPage',
           },
+          {
+            actions: 'increase',
+            cond: 'isGreaterThanEqualThirtyAndLessThanForty',
+            target: 'movieStart',
+            internal: false,
+          },
+          {
+            cond: 'isEqualForty',
+            target: 'startMidLandingPage',
+          }
         ],
       },
     },
@@ -266,6 +310,16 @@ const switchingMovieTask: StateMachineTask = {
             cond: 'isEqualTen',
             target: 'startMidLandingPage',
           },
+          {
+            actions: 'increase',
+            cond: 'isGreaterThanEqualThirtyAndLessThanForty',
+            target: 'birdStart',
+            internal: false,
+          },
+          {
+            cond: 'isEqualForty',
+            target: 'startMidLandingPage',
+          }
         ],
       },
     },
@@ -300,6 +354,16 @@ const switchingMovieTask: StateMachineTask = {
             cond: 'isEqualTwenty',
             target: 'midEndLandingPage',
           },
+          {
+            actions: 'increase',
+            cond: 'isGreaterThanEqualFortyAndLessThanFifty',
+            target: 'movieMid',
+            internal: false,
+          },
+          {
+            cond: 'isEqualFifty',
+            target: 'midEndLandingPage',
+          }
         ],
       },
     },
@@ -316,6 +380,16 @@ const switchingMovieTask: StateMachineTask = {
             cond: 'isEqualTwenty',
             target: 'midEndLandingPage',
           },
+          {
+            actions: 'increase',
+            cond: 'isGreaterThanEqualFortyAndLessThanFifty',
+            target: 'birdMid',
+            internal: false,
+          },
+          {
+            cond: 'isEqualFifty',
+            target: 'midEndLandingPage',
+          }
         ],
       },
     },
@@ -348,7 +422,17 @@ const switchingMovieTask: StateMachineTask = {
           },
           {
             cond: 'isEqualThirty',
-            target: 'taskEnd',
+            target: 'optionalLandingPage',
+          },
+          {
+            actions: 'increase',
+            cond: 'isLessThanSixty',
+            target: 'movieEnd',
+            internal: false,
+          },
+          {
+            cond: 'isEqualSixty',
+            target: 'taskEnd'
           },
         ],
       },
@@ -364,103 +448,56 @@ const switchingMovieTask: StateMachineTask = {
           },
           {
             cond: 'isEqualThirty',
-            target: 'taskEnd',
-          },
-        ],
-      },
-    },
-    taskEnd: {},
-  },
-}
-
-const switchingBirdTask: StateMachineTask = {
-  initial: 'taskStart',
-  states: {
-    taskStart: {
-      always: [
-        { target: 'taskEnd', cond: { type: 'isInitialState', targetState: 'task.taskEnd' } },
-        { target: 'birdStart' },
-      ],
-    },
-    birdStart: {
-      on: {
-        NEXT: [
-          {
-            actions: 'increase',
-            cond: 'isLessThanTen',
-            target: 'birdStart',
-            internal: false,
+            target: 'optionalLandingPage',
           },
           {
-            cond: 'isEqualTen',
-            target: 'startMidLandingPage',
-          },
-        ],
-      },
-    },
-    startMidLandingPage: {
-      on: {
-        NEXT: [
-          {
             actions: 'increase',
-            target: 'birdMid',
-            internal: false,
-          }
-        ]
-      }
-    },
-    birdMid: {
-      on: {
-        NEXT: [
-          {
-            actions: 'increase',
-            cond: 'isLessThanTwenty',
-            target: 'birdMid',
-            internal: false,
-          },
-          {
-            cond: 'isEqualTwenty',
-            target: 'midEndLandingPage',
-          },
-        ],
-      },
-    },
-    midEndLandingPage: {
-      on: {
-        NEXT: [
-          {
-            actions: 'increase',
-            target: 'birdEnd',
-            internal: false,
-          }
-        ]
-      }
-    },
-    birdEnd: {
-      on: {
-        NEXT: [
-          {
-            actions: 'increase',
-            cond: 'isLessThanThirty',
+            cond: 'isLessThanSixty',
             target: 'birdEnd',
             internal: false,
           },
           {
-            cond: 'isEqualThirty',
-            target: 'taskEnd',
+            cond: 'isEqualSixty',
+            target: 'taskEnd'
           },
         ],
       },
     },
+    optionalLandingPage: {
+      on: {
+        NEXT: [
+          {
+            actions: 'increase',
+            cond: 'optedInAndRequiresMovieStart',
+            target: 'movieStart'
+          },
+          {
+            actions: 'increase',
+            cond: 'optedInAndRequiresBirdStart',
+            target: 'birdStart'
+          },
+          {
+            cond: 'optedOut',
+            target: 'taskEnd',
+          },
+        ],
+        OPT_IN: [
+          {
+            actions: 'updateOptionalFlag'
+          }
+        ]
+      }
+    },
+    
     taskEnd: {},
   },
 }
 
 const generateMachine = (taskState: StateMachineTask) => {
   return taskModel.createMachine({
-    context: { taskType: 'bird', taskNumber: 0, initialState: '', condition: '' },
+    context: { taskType: 'bird', taskNumber: 0, initialState: '', condition: '', optedForOptional: false },
     tsTypes: {} as import('./progress.typegen').Typegen0,
-    schema: { context: {} as MyContext, events: {} as NextEvent | InitEvent },
+    schema: { context: {} as MyContext, events: {} as NextEvent | InitEvent | OptInEvent },
     id: 'progress',
     initial: 'boot',
     states: {
@@ -531,8 +568,7 @@ const generateMachine = (taskState: StateMachineTask) => {
 export const birdProgressMachine = generateMachine(birdTask)
 export const movieProgressMachine = generateMachine(movieTask)
 export const personProgressMachine = generateMachine(personTask)
-export const switchingMovieProgressMachine = generateMachine(switchingMovieTask)
-// export const switchingBirdProgressMachine = generateMachine(switchingBirdTask)
+export const switchingMovieProgressMachine = generateMachine(switchingTask)
 
 // const { initialState } = taskProgressMachine
 

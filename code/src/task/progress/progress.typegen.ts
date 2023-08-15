@@ -29,6 +29,7 @@ export interface Typegen0 {
     | 'task.taskEnd'
     | 'task.startMidLandingPage'
     | 'task.midEndLandingPage'
+    | 'task.optionalLandingPage'
     | 'task.movie'
     | 'task.movieStart'
     | 'task.movieMid'

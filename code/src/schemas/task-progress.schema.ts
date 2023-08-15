@@ -46,6 +46,9 @@ export class Task {
 
   @Prop({ default: Date.now })
   updated: Date
+
+  @Prop({default: false})
+  optedForOptional: boolean
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task).index({ purpose: 1, user: 1 }, { unique: true })
@@ -66,6 +69,7 @@ export class BirdAndMovieQuestions {
   state: string
   updated: Date
   purpose: Purpose
+  optedForOptional: boolean
 
   @Prop({ type: [TaskBirdBeakSchema], required: true })
   birds: TaskBirdBeak[]
@@ -93,6 +97,7 @@ export class BirdQuestions {
   state: string
   updated: Date
   purpose: Purpose
+  optedForOptional: boolean
 
   @Prop({ type: [TaskBirdBeakSchema], required: true })
   birds: TaskBirdBeak[]
@@ -112,6 +117,7 @@ export class MovieQuestions {
   state: string
   updated: Date
   purpose: Purpose
+  optedForOptional: boolean
 
   @Prop({ type: [TaskMovieReviewSchema], required: true })
   movieReviews: TaskMovieReview[]
@@ -132,6 +138,7 @@ export class PersonQuestions {
   state: string
   updated: Date
   purpose: Purpose
+  optedForOptional: boolean
 
   @Prop({ type: [TaskPersonSchema], required: true })
   midnamePersons: TaskPerson[]

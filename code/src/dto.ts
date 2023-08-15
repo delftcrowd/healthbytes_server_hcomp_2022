@@ -7,6 +7,7 @@ export type TaskDetails = Pick<Task, 'taskType' | 'state' | 'questionNumber' | '
   user: string
   inputModality: InputModality
   condition: string
+  optedForOptional: boolean
 }
 export type PersonQuestionsDetails = Pick<PersonQuestions, 'midnamePersons' | 'professionPersons' | 'answers'>
 export type MovieQuestionsDetails = Pick<MovieQuestions, 'movieReviews' | 'answers'>
@@ -33,12 +34,12 @@ export const getTaskDetails = (
     user: userDetails.prolificId,
     taskType: task.taskType,
     inputModality: userDetails.inputModality,
-    // purpose: userDetails.purpose,
     purpose: task.purpose,
     condition: userDetails.condition,
     state: task.state,
     questionNumber: task.questionNumber,
     complete: task.complete,
+    optedForOptional: task.optedForOptional
   }
 }
 

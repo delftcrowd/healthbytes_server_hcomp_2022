@@ -115,4 +115,11 @@ export class TaskController {
 
     return await this.taskService.answerQuestion(user, body)
   }
+
+  @Post('toggleOptedForOptional')
+  async toggleOptedForOptional(@Request() req) {
+    let user: UserDetails = req.user
+
+    return await this.taskService.toggleOptedForOptional(user)
+  }
 }

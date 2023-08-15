@@ -27,18 +27,26 @@ import {
   isLessThanTen,
   isLessThanTwenty,
   isLessThanThirty,
+  isGreaterThanEqualThirtyAndLessThanForty,
+  isEqualForty,
+  isGreaterThanEqualFortyAndLessThanFifty,
+  isEqualFifty,
+  isLessThanSixty,
+  isEqualSixty,
   movieProgressMachine,
   nextTask,
   personProgressMachine,
   taskModel,
   switchingMovieProgressMachine,
-  // switchingBirdProgressMachine,
   requiresTaskSwitchToBirdEnd,
   requiresTaskSwitchToBirdMid,
   requiresTaskSwitchToMovieEnd,
   requiresTaskSwitchToMovieMid,
   isBirdStart,
   isMovieStart,
+  optedOut,
+  optedInAndRequiresMovieStart,
+  optedInAndRequiresBirdStart
 } from './progress/progress'
 
 @Injectable()
@@ -76,6 +84,9 @@ export class TaskService {
           resetCount: taskModel.assign({
             taskNumber: 0,
           }),
+          updateOptionalFlag: taskModel.assign({
+            optedForOptional: true
+          })
         },
         guards: {
           isLessThanFive: isLessThanFive,
@@ -86,13 +97,22 @@ export class TaskService {
           isEqualTwenty: isEqualTwenty,
           isLessThanThirty: isLessThanThirty,
           isEqualThirty: isEqualThirty,
+          isGreaterThanEqualThirtyAndLessThanForty: isGreaterThanEqualThirtyAndLessThanForty,
+          isEqualForty: isEqualForty,
+          isGreaterThanEqualFortyAndLessThanFifty: isGreaterThanEqualFortyAndLessThanFifty,
+          isEqualFifty: isEqualFifty,
+          isLessThanSixty: isLessThanSixty,
+          isEqualSixty: isEqualSixty,
           isInitialState: isInitialState,
           requiresTaskSwitchToBirdEnd: requiresTaskSwitchToBirdEnd,
           requiresTaskSwitchToBirdMid: requiresTaskSwitchToBirdMid,
           requiresTaskSwitchToMovieEnd: requiresTaskSwitchToMovieEnd,
           requiresTaskSwitchToMovieMid: requiresTaskSwitchToMovieMid,
           isMovieStart: isMovieStart,
-          isBirdStart: isBirdStart
+          isBirdStart: isBirdStart,
+          optedOut: optedOut,
+          optedInAndRequiresMovieStart: optedInAndRequiresMovieStart,
+          optedInAndRequiresBirdStart: optedInAndRequiresBirdStart
           // isGestureTask: isGestureTask,
         },
       })
@@ -102,6 +122,7 @@ export class TaskService {
         taskNumber: taskProgress.questionNumber,
         initialState: taskProgress.state,
         inputModality: taskProgress.inputModality,
+        optedForOptional: taskProgress.optedForOptional
       })
 
     return interpret(newMachine)
@@ -150,7 +171,11 @@ export class TaskService {
 
     const condition = this.userProgress[user.prolificId].condition
     if (condition == "switching") {
-      questionThreshold = 30
+      if (this.userProgress[user.prolificId].optedForOptional) {
+        questionThreshold = 60
+      } else {
+        questionThreshold = 30
+      }
     }
 
     if (
@@ -188,7 +213,7 @@ export class TaskService {
 
     const state = this.userState[user.prolificId]
 
-    if (!state.state.matches('task') || state.state.matches('task.taskEnd') || state.state.matches('task.startMidLandingPage') || state.state.matches('task.midEndLandingPage')) {
+    if (!state.state.matches('task') || state.state.matches('task.taskEnd') || state.state.matches('task.startMidLandingPage') || state.state.matches('task.midEndLandingPage') || state.state.matches('task.optionalLandingPage')) {
       state.send('NEXT')
 
       this.syncProgress(user)
@@ -202,9 +227,6 @@ export class TaskService {
   }
 
   async updateUserProgress(taskProgress: TaskDetails) {
-    // if (userTaskType !== null && userTaskType !== undefined) {
-    //   taskProgress.taskType = userTaskType
-    // }
     if (!(taskProgress.user in this.userProgress)) {
       this.userProgress[taskProgress.user.toString()] = taskProgress
     }
@@ -228,11 +250,52 @@ export class TaskService {
             questionNumber: this.userProgress[pid].questionNumber,
             complete: this.userProgress[pid].complete,
             taskType: this.userProgress[pid].taskType,
+            optedForOptional: this.userProgress[pid].optedForOptional,
             updated: new Date
           },
         },
       )
       .exec()
+  }
+
+  async toggleOptedForOptional(user: UserDetails) {
+    this.userProgress[user.prolificId].optedForOptional = true
+    if (user.prolificId in this.userProgress) {
+
+      const updated = await this.taskModel
+      .updateOne(
+        { user: user.id },
+        {
+          $set: {
+            optedForOptional: this.userProgress[user.prolificId].optedForOptional,
+            updated: new Date
+          }
+        },
+        {new: true}
+      )
+      .exec()
+
+      const state = this.userState[user.prolificId]
+      state.send("OPT_IN")
+
+      return updated.modifiedCount == 1
+    }
+
+    throw new BadRequestException('User has no tasks')
+
+    // return {
+    //   task: {
+    //     user: user.prolificId,
+    //     taskType: updated.taskType,
+    //     inputModality: user.inputModality,
+    //     purpose: updated.purpose,
+    //     condition: user.condition,
+    //     state: updated.state,
+    //     questionNumber: updated.questionNumber,
+    //     complete: updated.complete,
+    //     optedForOptional: updated.optedForOptional
+    //   }
+    // }
   }
 
   // ---------------------------------------------------------------------------
@@ -243,10 +306,9 @@ export class TaskService {
     return !!(await this.taskModel.exists({ user }).exec())
   }
 
-  // How to get updateUserProgress to be aware of the taskType from user object to put on TaskDetails
   async getTask(user: string) {
     const taskProgress = getTaskDetails(
-      await this.taskModel.findOne({ user }).populate('user', 'prolificId inputModality purpose condition -_id'),
+      await this.taskModel.findOne({ user }).populate('user', 'prolificId inputModality purpose condition optedForOptional -_id'),
     )
     await this.updateUserProgress(taskProgress)
     return taskProgress
@@ -273,26 +335,7 @@ export class TaskService {
         }
       case 'switching':
         return this.getBirdAndMovieQuestion(userId)
-        // switch (task.taskType) {
-        //   case 'bird':
-            
-        //   case 'movie':
-        //     return this.getMovieQuestion(userId)
-        //   default:
-        //     return null
-        // }
     }
-
-    // switch (task.taskType) {
-    //   case 'bird':
-    //     return this.getBirdQuestion(userId)
-    //   case 'movie':
-    //     return this.getMovieQuestion(userId)
-    //   case 'person':
-    //     return this.getPersonQuestion(userId)
-    //   default:
-    //     return null
-    // }
   }
 
   async getBirdAndMovieQuestion(userId: string) {
@@ -304,31 +347,43 @@ export class TaskService {
     }
 
     // Determine condition from length of movieReviews and birds
-    if (questions.movieReviews.length == 30) {
+    if (questions.movieReviews.length == 60) {
       // This is an A0-A7 condition
       return this.getQuestionFromMovie(questions.movieReviews[questions.answers.length])
-    } else if (questions.birds.length == 30) {
+    } else if (questions.birds.length == 60) {
       // This is an A8-A15 condition
       return this.getQuestionFromBird(questions.birds[questions.answers.length])
-    } else if (questions.movieReviews.length == 20) {
-      // This is a B0-B7 condition, need to see where the answer length is at
+    } else if (questions.movieReviews.length == 40) {
+      // This is a B0-B7 condition
       if (questions.answers.length < 10) {
         return this.getQuestionFromMovie(questions.movieReviews[questions.answers.length])
-      } else if (questions.answers.length >= 20) {
+      } else if (questions.answers.length >= 10 && questions.answers.length < 20) {
+        // Offset for the ten movies preceding the birds
+        return this.getQuestionFromBird(questions.birds[questions.answers.length - 10])
+      } else if (questions.answers.length >= 20 && questions.answers.length < 40) {
         // Offset for 10 questions being on birds
         return this.getQuestionFromMovie(questions.movieReviews[questions.answers.length - 10])
-      } else if (questions.answers.length >= 10 && questions.answers.length < 20) {
-        return this.getQuestionFromBird(questions.birds[questions.answers.length - 10])
+      } else if (questions.answers.length >= 40 && questions.answers.length < 50) {
+        // Offset to account for the intervening movies questions
+        return this.getQuestionFromBird(questions.birds[questions.answers.length - 30])
+      } else if (questions.answers.length >= 50) {
+        // Offset for 20 questions being on birds
+        return this.getQuestionFromMovie(questions.movieReviews[questions.answers.length - 20])
       }
-    } else if (questions.birds.length == 20) {
+    } else if (questions.birds.length == 40) {
       // This is a B8-B15 condition
       if (questions.answers.length < 10) {
         return this.getQuestionFromBird(questions.birds[questions.answers.length])
-      } else if (questions.answers.length >= 20) {
-        // Offset for 10 questions being on birds
-        return this.getQuestionFromBird(questions.birds[questions.answers.length - 10])
       } else if (questions.answers.length >= 10 && questions.answers.length < 20) {
         return this.getQuestionFromMovie(questions.movieReviews[questions.answers.length - 10])
+      } else if (questions.answers.length >= 20 && questions.answers.length < 40) {
+        // Offset for 10 questions being on birds
+        return this.getQuestionFromBird(questions.birds[questions.answers.length - 10])
+      } else if (questions.answers.length >= 40 && questions.answers.length < 50) {
+        return this.getQuestionFromMovie(questions.movieReviews[questions.answers.length - 30])
+      } else if (questions.answers.length >= 50) {
+        // Offset for 10 questions being on birds
+        return this.getQuestionFromBird(questions.birds[questions.answers.length - 20])
       }
     }
   }
@@ -458,7 +513,7 @@ export class TaskService {
         break
       case 'switching':
         if (condition.slice(0,1) == "A") {
-          questionCount = 30
+          questionCount = 60
           switch (type) {
             case 'bird':
               model = await this.generateBirdQuestions(userId, questionCount, purpose)
@@ -471,29 +526,16 @@ export class TaskService {
               break
           }
         } else if (["B0", "B1", "B2", "B3", "B4", "B5", "B6", "B7"].includes(condition)) {
-          model = await this.generateBirdAndMovieQuestions(userId, 10, 20, purpose, user.taskType)
+          model = await this.generateBirdAndMovieQuestions(userId, 20, 40, purpose, user.taskType)
           break
         } else if (["B8", "B9", "B10", "B11", "B12", "B13", "B14", "B15"].includes(condition)) {
-          model = await this.generateBirdAndMovieQuestions(userId, 20, 10, purpose, user.taskType)
+          model = await this.generateBirdAndMovieQuestions(userId, 40, 20, purpose, user.taskType)
           break
         }
         break
     }
-    // switch (type) {
-    //   case 'bird':
-    //     model = await this.generateBirdQuestions(userId, questionCount, purpose)
-    //     break
-    //   case 'movie':
-    //     model = await this.generateMovieQuestions(userId, questionCount, purpose)
-    //     break
-    //   case 'person':
-    //     model = await this.generatePersonQuestions(userId, purpose)
-    //     break
-    // }
-    // const newUserProgress = this.taskModel(model)
     const newUserProgress = new this.taskModel(model)
     return newUserProgress.save()
-    // this.taskModel.findOneAndReplace({ user: user }, newUserProgress, { new: true, upsert: true })
   }
 
   private async generateBirdAndMovieQuestions(user: string, birdQuestionCount: number, movieQuestionCount: number, purpose: Purpose, startingTaskType: TaskTypes): Promise<BirdAndMovieQuestions> {
@@ -508,7 +550,8 @@ export class TaskService {
       birds: this.getRandom(this.birds, birdQuestionCount),
       movieReviews: this.getRandom(this.movieReviews, movieQuestionCount),
       purpose: purpose,
-      updated: new Date
+      updated: new Date,
+      optedForOptional: false
     }
   }
 
@@ -524,7 +567,8 @@ export class TaskService {
       taskType: 'bird',
       birds: this.getRandom(this.birds, questionCount),
       purpose: purpose,
-      updated: new Date
+      updated: new Date,
+      optedForOptional: false
     }
   }
 
@@ -540,7 +584,8 @@ export class TaskService {
       taskType: 'movie',
       movieReviews: this.getRandom(this.movieReviews, questionCount),
       purpose: purpose,
-      updated: new Date
+      updated: new Date,
+      optedForOptional: false
     }
   }
 
@@ -557,7 +602,8 @@ export class TaskService {
       midnamePersons: this.shuffleArray(this.midnamePersons.slice(0)),
       professionPersons: this.shuffleArray(this.professionPersons.slice(0)),
       purpose: purpose,
-      updated: new Date
+      updated: new Date,
+      optedForOptional: false
     }
   }
 
