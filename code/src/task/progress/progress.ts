@@ -125,11 +125,16 @@ export type OptInEvent = {
   type: 'OPT_IN'
 }
 
+export type EndOptionalEvent = {
+  type: 'END_OPTIONAL'
+}
+
 export const taskModel = createModel({} as MyContext, {
   events: {
     NEXT: () => ({}),
     INIT: () => ({}),
-    OPT_IN: () => ({})
+    OPT_IN: () => ({}),
+    END_OPTIONAL: () => ({})
   },
 })
 
@@ -295,6 +300,11 @@ const switchingTask: StateMachineTask = {
             target: 'startMidLandingPage',
           }
         ],
+        END_OPTIONAL: [
+          {
+            target: 'taskEnd'
+          }
+        ]
       },
     },
     birdStart: {
@@ -321,6 +331,11 @@ const switchingTask: StateMachineTask = {
             target: 'startMidLandingPage',
           }
         ],
+        END_OPTIONAL: [
+          {
+            target: 'taskEnd'
+          }
+        ]
       },
     },
     startMidLandingPage: {
@@ -365,6 +380,11 @@ const switchingTask: StateMachineTask = {
             target: 'midEndLandingPage',
           }
         ],
+        END_OPTIONAL: [
+          {
+            target: 'taskEnd'
+          }
+        ]
       },
     },
     birdMid: {
@@ -391,6 +411,11 @@ const switchingTask: StateMachineTask = {
             target: 'midEndLandingPage',
           }
         ],
+        END_OPTIONAL: [
+          {
+            target: 'taskEnd'
+          }
+        ]
       },
     },
     midEndLandingPage: {
@@ -435,6 +460,11 @@ const switchingTask: StateMachineTask = {
             target: 'taskEnd'
           },
         ],
+        END_OPTIONAL: [
+          {
+            target: 'taskEnd'
+          }
+        ]
       },
     },
     birdEnd: {
@@ -461,6 +491,11 @@ const switchingTask: StateMachineTask = {
             target: 'taskEnd'
           },
         ],
+        END_OPTIONAL: [
+          {
+            target: 'taskEnd'
+          }
+        ]
       },
     },
     optionalLandingPage: {
@@ -497,7 +532,7 @@ const generateMachine = (taskState: StateMachineTask) => {
   return taskModel.createMachine({
     context: { taskType: 'bird', taskNumber: 0, initialState: '', condition: '', optedForOptional: false },
     tsTypes: {} as import('./progress.typegen').Typegen0,
-    schema: { context: {} as MyContext, events: {} as NextEvent | InitEvent | OptInEvent },
+    schema: { context: {} as MyContext, events: {} as NextEvent | InitEvent | OptInEvent | EndOptionalEvent },
     id: 'progress',
     initial: 'boot',
     states: {

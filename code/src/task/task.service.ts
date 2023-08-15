@@ -282,20 +282,6 @@ export class TaskService {
     }
 
     throw new BadRequestException('User has no tasks')
-
-    // return {
-    //   task: {
-    //     user: user.prolificId,
-    //     taskType: updated.taskType,
-    //     inputModality: user.inputModality,
-    //     purpose: updated.purpose,
-    //     condition: user.condition,
-    //     state: updated.state,
-    //     questionNumber: updated.questionNumber,
-    //     complete: updated.complete,
-    //     optedForOptional: updated.optedForOptional
-    //   }
-    // }
   }
 
   // ---------------------------------------------------------------------------
@@ -312,6 +298,12 @@ export class TaskService {
     )
     await this.updateUserProgress(taskProgress)
     return taskProgress
+  }
+
+  async endOptional (user: string) {
+    const state = this.userState[user]
+    state.send('END_OPTIONAL')
+    return true
   }
 
   // ---------------------------------------------------------------------------

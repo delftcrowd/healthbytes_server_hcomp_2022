@@ -122,4 +122,11 @@ export class TaskController {
 
     return await this.taskService.toggleOptedForOptional(user)
   }
+
+  @Post('endOptional')
+  async endOptional(@Request() req) {
+    let user: UserDetails = req.user
+
+    return await this.taskService.endOptional(user.prolificId)
+  }
 }
