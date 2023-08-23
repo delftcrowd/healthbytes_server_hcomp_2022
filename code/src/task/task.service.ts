@@ -127,7 +127,7 @@ export class TaskService {
 
     return interpret(newMachine)
       .onTransition((state) => {
-        console.debug(state.value)
+        console.debug(state.value, taskProgress.user)
         console.debug(state.context)
       })
       .start()

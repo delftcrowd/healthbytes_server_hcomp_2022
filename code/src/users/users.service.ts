@@ -51,14 +51,14 @@ export class UserService {
     return await this.userModel.findOneAndUpdate({ prolificId }, { $set: {taskType: taskType}}).exec()
   }
 
-  completeEntryQuestionnaire(prolificId: string) {
+  async completeEntryQuestionnaire(prolificId: string) {
     console.debug("setting completeEntryQuestionnaire flag")
-    return this.userModel.updateOne({ prolificId }, { $set: { entrySurveyCompleted: true } }).exec()
+    return await this.userModel.updateOne({ prolificId }, { $set: { entrySurveyCompleted: true } }).exec()
   }
 
-  completeExitQuestionnaire(prolificId: string) {
+  async completeExitQuestionnaire(prolificId: string) {
     console.debug("setting completeExitQuestionnaire flag")
-    return this.userModel.updateOne({ prolificId }, { $set: { exitSurveyCompleted: true } }).exec()
+    return await this.userModel.updateOne({ prolificId }, { $set: { exitSurveyCompleted: true } }).exec()
   }
 
   async create(prolificId: string, purpose: Purpose, taskType: TaskTypes, inputModality: InputModality, condition?: string): Promise<UserDocument> {

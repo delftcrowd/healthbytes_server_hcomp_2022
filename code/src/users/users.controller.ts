@@ -21,9 +21,9 @@ export class UserController {
 
   @Public()
   @Post('completeEntryQuestionnaire')
-  completeEntryQuestionnaire(@Query('pid') prolificId) {
+  async completeEntryQuestionnaire(@Query('pid') prolificId) {
     console.debug("request received in completeEntryQuestionnaire endpoint", prolificId)
-    this.userService.completeEntryQuestionnaire(prolificId)
+    return this.userService.completeEntryQuestionnaire(prolificId)
   }
 
   @Get('isExitQuestionnaireComplete')
@@ -34,9 +34,9 @@ export class UserController {
 
   @Public()
   @Post('completeExitQuestionnaire')
-  completeExitQuestionnaire(@Query('pid') prolificId) {
+  async completeExitQuestionnaire(@Query('pid') prolificId) {
     console.debug("request received in completeExitQuestionnaire endpoint", prolificId)
-    this.userService.completeExitQuestionnaire(prolificId)
+    return this.userService.completeExitQuestionnaire(prolificId)
   }
 
   @Post('revokeConsent')
